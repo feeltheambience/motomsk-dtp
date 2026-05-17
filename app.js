@@ -1,6 +1,4 @@
-const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-    ? 'http://localhost:8095'
-    : 'http://64.188.124.191:8095';
+const DATA_BASE = './data';
 
 const MONTH_NAMES = [
     '', 'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
@@ -13,8 +11,8 @@ const TYPE_COLORS = {
     'ДТП одиночное': '#f0c929',
     'ДТП прочее': '#533483',
     'Поломка': '#4ecca3',
-    'Угон': '#1a1a2e',
-    'Розыск': '#16213e',
+    'Угон': '#c0392b',
+    'Розыск': '#2980b9',
     'Информация': '#0f3460'
 };
 
@@ -29,6 +27,8 @@ const SEVERITY_CLASS = {
 
 let map = null;
 let markers = null;
+let allYears = [];
+let allTypes = [];
 
 if (window.Telegram && window.Telegram.WebApp) {
     window.Telegram.WebApp.ready();
@@ -46,30 +46,30 @@ document.querySelectorAll('.tab').forEach(tab => {
     });
 });
 
-async function api(endpoint, params = {}) {
-    const url = new URL(`${API_BASE}/api/${endpoint}`);
-    Object.entries(params).forEach(([k, v]) => {
-        if (v !== '' && v !== null && v !== undefined) url.searchParams.set(k, v);
-    });
-    const resp = await fetch(url);
+async function loadJSON(path) {
+    const resp = await fetch(`${DATA_BASE}/${path}?_=${Date.now()}`);
+    if (!resp.ok) return null;
     return resp.json();
 }
 
 async function loadFilters() {
     const [yearsData, typesData] = await Promise.all([
-        api('years'),
-        api('types')
+        loadJSON('years.json'),
+        loadJSON('types.json')
     ]);
+
+    allYears = yearsData ? yearsData.years : [];
+    allTypes = typesData ? typesData.types : [];
 
     const yearSelect = document.getElementById('year-select');
     const mapYearSelect = document.getElementById('map-year-select');
-    yearsData.years.forEach(y => {
+    allYears.forEach(y => {
         yearSelect.add(new Option(y, y));
         mapYearSelect.add(new Option(y, y));
     });
 
     const typeSelect = document.getElementById('type-select');
-    typesData.types.forEach(t => {
+    allTypes.forEach(t => {
         typeSelect.add(new Option(t, t));
     });
 }
@@ -79,7 +79,25 @@ async function loadStats() {
     const month = document.getElementById('month-select').value;
     const type = document.getElementById('type-select').value;
 
-    const data = await api('stats', { year, month, type });
+    let data = null;
+
+    if (type) {
+        const safeName = type.replace(/\//g, '_').replace(/ /g, '_');
+        data = await loadJSON(`type_${safeName}.json`);
+    } else if (year && month) {
+        data = await loadJSON(`stats_${year}_${month}.json`);
+    } else if (year) {
+        data = await loadJSON(`months_${year}.json`);
+    } else {
+        data = await loadJSON('stats.json');
+    }
+
+    if (!data) {
+        document.getElementById('stats-cards').innerHTML = '<div class="loading">Нет данных</div>';
+        document.getElementById('stats-chart').innerHTML = '';
+        document.getElementById('stats-table').innerHTML = '';
+        return;
+    }
 
     document.getElementById('total-count').textContent = `Всего инцидентов: ${data.total}`;
 
@@ -142,6 +160,7 @@ function renderChart(data, filters) {
     let html = `<div class="chart-title">${title}</div>`;
     stats.forEach(r => {
         let label = r.incident_type || (r.month ? MONTH_NAMES[r.month] : r.year) || '?';
+        if (r.year && r.month) label = `${MONTH_NAMES[r.month]} ${r.year}`;
         const pct = max ? (r.cnt / max * 100) : 0;
         const color = TYPE_COLORS[r.incident_type] || '#e94560';
         html += `
@@ -194,7 +213,7 @@ function renderTable(data, filters) {
 function initMap() {
     map = L.map('map').setView([55.75, 37.62], 10);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap'
+        attribution: '&copy; OpenStreetMap'
     }).addTo(map);
     markers = L.layerGroup().addTo(map);
     loadMapData();
@@ -202,14 +221,17 @@ function initMap() {
 
 async function loadMapData() {
     const year = document.getElementById('map-year-select').value;
-    const data = await api('map', { year });
+    const filename = year ? `map_${year}.json` : 'map.json';
+    const data = await loadJSON(filename);
 
     markers.clearLayers();
 
-    const incidents = data.incidents || [];
+    const incidents = (data && data.incidents) || [];
     document.getElementById('map-count').textContent = `${incidents.length} точек`;
 
     incidents.forEach(inc => {
+        if (!inc.latitude || !inc.longitude) return;
+
         const severityClass = SEVERITY_CLASS[inc.severity] || 'severity-unknown';
         const color = inc.severity === 'Смерть' ? '#333'
             : inc.severity === 'Тяжёлая' ? '#e94560'
@@ -227,8 +249,8 @@ async function loadMapData() {
         });
 
         marker.bindPopup(`
-            <b>${inc.incident_type}</b>
-            <span class="severity-badge ${severityClass}">${inc.severity}</span><br>
+            <b>${inc.incident_type || ''}</b>
+            <span class="severity-badge ${severityClass}">${inc.severity || ''}</span><br>
             📍 ${inc.location || 'Без адреса'}<br>
             📅 ${inc.date ? inc.date.split('T')[0] : ''}
         `);
@@ -237,8 +259,11 @@ async function loadMapData() {
     });
 
     if (incidents.length > 0) {
-        const bounds = L.latLngBounds(incidents.map(i => [i.latitude, i.longitude]));
-        map.fitBounds(bounds, { padding: [20, 20] });
+        const valid = incidents.filter(i => i.latitude && i.longitude);
+        if (valid.length) {
+            const bounds = L.latLngBounds(valid.map(i => [i.latitude, i.longitude]));
+            map.fitBounds(bounds, { padding: [20, 20] });
+        }
     }
 }
 
