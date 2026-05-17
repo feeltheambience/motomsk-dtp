@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>МотоМосква.ДТП — Статистика</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1>🏍 МотоМосква.ДТП</h1>
+            <p id="total-count">Загрузка...</p>
+        </header>
+
+        <nav id="tabs">
+            <button class="tab active" data-tab="stats">📊 Статистика</button>
+            <button class="tab" data-tab="map">🗺 Карта</button>
+        </nav>
+
+        <section id="stats-section" class="section active">
+            <div class="filters">
+                <div class="filter-group">
+                    <label>Год:</label>
+                    <select id="year-select">
+                        <option value="">Все годы</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Месяц:</label>
+                    <select id="month-select">
+                        <option value="">Все месяцы</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Тип:</label>
+                    <select id="type-select">
+                        <option value="">Все типы</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="stats-cards" class="cards"></div>
+            <div id="stats-chart" class="chart-container"></div>
+            <div id="stats-table"></div>
+        </section>
+
+        <section id="map-section" class="section">
+            <div class="map-filters">
+                <select id="map-year-select">
+                    <option value="">Все годы</option>
+                </select>
+                <span id="map-count">0 точек</span>
+            </div>
+            <div id="map"></div>
+        </section>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
