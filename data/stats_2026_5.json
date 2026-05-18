@@ -1,1 +1,1 @@
-{"stats": [{"incident_type": "ДТП мот/авто", "cnt": 127}, {"incident_type": "Поломка", "cnt": 10}, {"incident_type": "ДТП прочее", "cnt": 9}, {"incident_type": "ДТП одиночное", "cnt": 9}, {"incident_type": "Информация", "cnt": 8}, {"incident_type": "ДТП мот/мот", "cnt": 2}], "total": 165}
+{"stats": [{"incident_type": "ДТП мот/авто", "cnt": 127}, {"incident_type": "Поломка", "cnt": 10}, {"incident_type": "Информация", "cnt": 9}, {"incident_type": "ДТП прочее", "cnt": 9}, {"incident_type": "ДТП одиночное", "cnt": 9}, {"incident_type": "ДТП мот/мот", "cnt": 2}], "total": 166}
