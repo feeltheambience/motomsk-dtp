@@ -1,1 +1,1 @@
-{"stats": [{"incident_type": "Информация", "cnt": 5}], "total": 5}
+{"stats": [{"incident_type": "Поломка", "cnt": 2}, {"incident_type": "ДТП мот/авто", "cnt": 2}, {"incident_type": "ДТП прочее", "cnt": 1}], "total": 5}

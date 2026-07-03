@@ -1,1 +1,1 @@
-{"stats": [{"incident_type": "Информация", "cnt": 2171}], "total": 2171}
+{"stats": [{"incident_type": "ДТП мот/авто", "cnt": 1792}, {"incident_type": "Поломка", "cnt": 127}, {"incident_type": "ДТП прочее", "cnt": 91}, {"incident_type": "ДТП одиночное", "cnt": 87}, {"incident_type": "Информация", "cnt": 44}, {"incident_type": "ДТП мот/мот", "cnt": 30}], "total": 2171}
