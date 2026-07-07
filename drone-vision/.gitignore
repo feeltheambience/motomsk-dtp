@@ -1,0 +1,5 @@
+.venv/
+video_cache/
+*.pt
+*.mp4
+__pycache__/
