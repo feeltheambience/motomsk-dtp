@@ -1,0 +1,12 @@
+[
+  {
+    "title": "Пример: товар на Wildberries",
+    "url": "https://www.wildberries.ru/catalog/12345678/detail.aspx",
+    "target": 2000
+  },
+  {
+    "title": "Пример: товар на Ozon",
+    "url": "https://www.ozon.ru/product/primer-tovara-123456789/",
+    "target": 5000
+  }
+]
